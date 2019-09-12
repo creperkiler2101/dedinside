@@ -1,45 +1,41 @@
-$("#id").click(search());
+let tasks = [];
 
-function search() {
-    let user = $("#user").val();
-    let url = `https://api.github.com/search/users?q=${user}`;
+const taskForm = document.getElementById("task-form");
+const taskInputField = document.getElementById("task");
+const taskList = document.getElementsByClassName("collection")[0];
+const clearTasksButton = document.getElementsByClassName("clear-tasks")[0];
+const filterInputField = document.getElementById("filter");
 
-    getJSON(url, function(err, data) {
-        if (err !== null && err !== 422) {
-            //alert(`Error: ${err}`);
-        } else {
-            let result = "";
-            data.items.array.forEach(val => {
-                result += "<div class='user_display'>";
-                
-                result += "<div class='avatar'>";
-                result += `<img alt='image' src='${val.avatar_url}'>`;
-                result += "</div>";
-
-                result += "<div class='name'>"
-                result += `<h2>${val.login}</h2>`;
-                result += "</div>";
-
-                result += "</div>";
-            });
-            document.getElementById("result").innerHTML = result;
-        }
-    });
-
-    return false;
+onLoad();
+function onLoad() {
+    clearTasksButton.addEventListener("click", clearTasks);
+    taskForm.addEventListener("submit", addTask);
+    //filterInputField.addEventListener("change", filterTasks);
+    filterInputField.addEventListener("keyup", filterTasks);
 }
 
-function getJSON(url, callback) {
-    let xmlr = new XMLHttpRequest();
-    xmlr.open("GET", url, true);
-    xmlr.responseType = "json";
-    xmlr.onload = function() {
-        let status = xmlr.status;
-        if (status === 200) {
-            callback(null, xmlr.response);
-        } else {
-            callback(status, xmlr.response);
+function filterTasks(e) {
+    showTasks(filterInputField.value);
+}
+
+function clearTasks(e) {
+    tasks = [];
+    showTasks("");
+}
+
+function addTask(e) {
+    tasks.push(taskInputField.value);
+    taskInputField.value = "";
+    showTasks("");
+    e.preventDefault();
+}
+
+function showTasks(filter) {
+    let result = "";
+    tasks.forEach(function(task) {
+        if (task.substr(0, filter.length) == filter.toLowerCase()) {
+            result += `<li>${task}</li>`;
         }
-    };
-    xmlr.send();
+    });
+    taskList.innerHTML = result;
 }
